@@ -84,89 +84,91 @@ def main():
                 # print("No popup!")
                 pass
     
-            # Find all words within the sentence
-            span_elements = WebDriverWait(driver, 20).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".sentence .pointAndClickSpan")))
-            if span_elements:
-                # Initialize an empty string to store the sentence
-                sentence = ''
-                # Iterate over the span elements and concatenate their text
-                for span in span_elements:
-                    # If the span is empty, add a space to the sentence
-                    if span.text == '':
-                        sentence += ' '
-                    # Otherwise, add the span's text to the sentence
+            try:
+                # Find all words within the sentence
+                span_elements = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".sentence .pointAndClickSpan")))
+                if span_elements:
+                    # Initialize an empty string to store the sentence
+                    sentence = ''
+                    # Iterate over the span elements and concatenate their text
+                    for span in span_elements:
+                        # If the span is empty, add a space to the sentence
+                        if span.text == '':
+                            sentence += ' '
+                        # Otherwise, add the span's text to the sentence
+                        else:
+                            sentence += span.text
+                    # print("")
+                    # print("Sentence is:")
+                    # print(sentence)
+        
+                    # Execute a SELECT query to check if a row with the sentence already exists
+                    c.execute("SELECT * FROM Sentences WHERE sentence = ?", (sentence,))
+                    row = c.fetchone()
+        
+                    # If the row exists, clicks on the mistake
+                    if row is not None:
+                        print("🚀 Sentence already exists in the database!")
+                        no_mistake = row[1]  # Assuming no_mistake is the second column in the table
+                        # If there's no mistake
+                        if no_mistake == 1:
+                            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".noMistakeButton"))).click()
+                            print("🏅 Gotcha!")
+                        else:
+                            mistake_text = row[2]  # Assuming mistake_text is the third column in the table
+                            # print(mistake_text)
+                            for span in span_elements:
+                                if span.text == mistake_text:
+                                    span.click()
+                                    print("🏅 Gotcha!")
+                                    break
+        
+                    # If the row doesn't exist, insert the sentence into the 'Sentences' table
                     else:
-                        sentence += span.text
-                # print("")
-                # print("Sentence is:")
-                # print(sentence)
-    
-                # Execute a SELECT query to check if a row with the sentence already exists
-                c.execute("SELECT * FROM Sentences WHERE sentence = ?", (sentence,))
-                row = c.fetchone()
-    
-                # If the row exists, clicks on the mistake
-                if row is not None:
-                    print("🚀 Sentence already exists in the database!")
-                    no_mistake = row[1]  # Assuming no_mistake is the second column in the table
-                    # If there's no mistake
-                    if no_mistake == 1:
+                        print("⛏️ New sentence found!")
+                        # Clicks on the "No mistake" button
                         WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".noMistakeButton"))).click()
-                        print("🏅 Gotcha!")
-                    else:
-                        mistake_text = row[2]  # Assuming mistake_text is the third column in the table
-                        # print(mistake_text)
-                        for span in span_elements:
-                            if span.text == mistake_text:
-                                span.click()
-                                print("🏅 Gotcha!")
-                                break
-    
-                # If the row doesn't exist, insert the sentence into the 'Sentences' table
-                else:
-                    print("⛏️ New sentence found!")
-                    # Clicks on the "No mistake" button
-                    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".noMistakeButton"))).click()
-    
-                    # Waits for the answer to appear
-                    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".answerStatusBar")))
-    
-                    # Checks if the answer is correct or not
-                    try:
-                        driver.find_element(By.CSS_SELECTOR, '.answerStatusBar.correct')
-                        print("🏅 Gotcha!")
-                        no_mistake = 1
-                        mistake_text = None  # No mistake text when there are no mistakes
-                    except:
-                        print("✒️ There's a mistake! Saving it...")
-                        no_mistake = 0
-                        mistake_element = driver.find_element(By.CSS_SELECTOR, '.answerWord')
-                        mistake_text = mistake_element.text
-                        # Remove unwanted characters from mistake_text
-                        mistake_text = mistake_text.replace("'", "").replace(".", "").replace(",", "")
-                        def split_text(mistake_text):
-                            for delimiter in [' ', '-', '‑']:
-                                if mistake_text and mistake_text[0] == delimiter:
-                                    mistake_text = mistake_text[1:]
-                                elif mistake_text and mistake_text[-1] == delimiter:
-                                    mistake_text = mistake_text[:-1]
-                                else:
-                                    parts = mistake_text.split(delimiter)
-                                    if len(parts) > 1:
-                                        mistake_text = parts[0]
-                            return mistake_text
-                        mistake_text = split_text(mistake_text)
-                        mistake_text = split_text(mistake_text)
-                    # Inserts the sentence and the correctness of the answer into the 'Sentences' table
-                    c.execute("INSERT INTO Sentences VALUES (?, ?, ?)", (sentence, no_mistake, mistake_text))
-                    conn.commit()
-                # Goes to the next question
-                WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".nextButton"))).click()
-            else:
-                # Checks whether we're at the end screen or not
+        
+                        # Waits for the answer to appear
+                        WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".answerStatusBar")))
+        
+                        # Checks if the answer is correct or not
+                        try:
+                            driver.find_element(By.CSS_SELECTOR, '.answerStatusBar.correct')
+                            print("🏅 Gotcha!")
+                            no_mistake = 1
+                            mistake_text = None  # No mistake text when there are no mistakes
+                        except:
+                            print("✒️ There's a mistake! Saving it...")
+                            no_mistake = 0
+                            mistake_element = driver.find_element(By.CSS_SELECTOR, '.answerWord')
+                            mistake_text = mistake_element.text
+                            # Remove unwanted characters from mistake_text
+                            mistake_text = mistake_text.replace(".", "").replace(",", "")
+                            def split_text(mistake_text):
+                                for delimiter in [' ', '-', '‑', "'"]:
+                                    if mistake_text and mistake_text[0] == delimiter:
+                                        mistake_text = mistake_text[1:]
+                                    elif mistake_text and mistake_text[-1] == delimiter:
+                                        mistake_text = mistake_text[:-1]
+                                    else:
+                                        parts = mistake_text.split(delimiter)
+                                        if len(parts) > 1:
+                                            mistake_text = parts[0]
+                                return mistake_text
+
+                            mistake_text = split_text(mistake_text)
+                            mistake_text = split_text(mistake_text)
+                        # Inserts the sentence and the correctness of the answer into the 'Sentences' table
+                        c.execute("INSERT INTO Sentences VALUES (?, ?, ?)", (sentence, no_mistake, mistake_text))
+                        conn.commit()
+                    # Goes to the next question
+                    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".nextButton"))).click()
+            except TimeoutException:
+                    # Checks whether we're at the end screen or not
                 try:
                     # Check if the element .trainingEndViewDiv is present
-                    WebDriverWait(driver, 0.2).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.trainingEndViewDiv')))
+                    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.trainingEndViewDiv')))
                     print("")
                     print("🎉 Level completed!")
                     response = input("Do you want to continue? (y/n) ")
