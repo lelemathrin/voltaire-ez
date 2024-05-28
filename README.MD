@@ -30,7 +30,7 @@ Automatise le passage des niveaux de la partie "Orthographe" de Projet-Voltaire.
 
 ## Running the Script
 
-To run the script, use the following command:
+1. To run the script, use the following command:
     ```bash
     python voltaire-pwner.py
 
