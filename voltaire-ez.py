@@ -133,7 +133,7 @@ def main():
     
                     # Checks if the answer is correct or not
                     try:
-                        correct_element = driver.find_element(By.CSS_SELECTOR, '.answerStatusBar.correct')
+                        driver.find_element(By.CSS_SELECTOR, '.answerStatusBar.correct')
                         print("🏅 Gotcha!")
                         no_mistake = 1
                         mistake_text = None  # No mistake text when there are no mistakes
@@ -144,7 +144,19 @@ def main():
                         mistake_text = mistake_element.text
                         # Remove unwanted characters from mistake_text
                         mistake_text = mistake_text.replace("'", "").replace(".", "").replace(",", "")
-                        mistake_text = mistake_text.split(' ')[0].split('-')[0].split('‑')[0]
+                        def split_text(mistake_text):
+                            for delimiter in [' ', '-', '‑']:
+                                if mistake_text and mistake_text[0] == delimiter:
+                                    mistake_text = mistake_text[1:]
+                                elif mistake_text and mistake_text[-1] == delimiter:
+                                    mistake_text = mistake_text[:-1]
+                                else:
+                                    parts = mistake_text.split(delimiter)
+                                    if len(parts) > 1:
+                                        mistake_text = parts[0]
+                            return mistake_text
+                        mistake_text = split_text(mistake_text)
+                        mistake_text = split_text(mistake_text)
                     # Inserts the sentence and the correctness of the answer into the 'Sentences' table
                     c.execute("INSERT INTO Sentences VALUES (?, ?, ?)", (sentence, no_mistake, mistake_text))
                     conn.commit()
