@@ -31,8 +31,8 @@ Automatise le passage des niveaux de la partie "Orthographe" de Projet-Voltaire.
 ## Running the Script
 
 To run the script, use the following command:
-   ```bash
-   python voltaire-pwner.py
+    ```bash
+    python voltaire-pwner.py
 
 After running the script, it will start entering your credentials and you will be asked to resolve a captcha and click the sign in button, be sure to focus the window during this process.
 Once you've done that, the script will take over and start gathering the correct answers.
