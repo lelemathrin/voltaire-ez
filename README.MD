@@ -34,5 +34,20 @@ Automatise le passage des niveaux de la partie "Orthographe" de Projet-Voltaire.
     ```bash
     python voltaire-ez.py
 
-After running the script, it will start entering your credentials and you will be asked to resolve a captcha and click the sign in button, be sure to focus the window during this process.
-Once you've done that, the script will take over and start gathering the correct answers.
+2. After running the script, it will start entering your credentials and **you will be asked to resolve a captcha and click the sign in button.**
+
+3. Once you've done that, the script will take over and start gathering the correct answers for your current level.
+
+4. When it finishes the current level, you will be asked to manually choose whether you want to continue or not.
+
+### Warning
+❗ **Please keep the Chrome window in the foreground of your screen** ❗ to avoid errors. 
+
+You can: 
+- reduce its size (not too much)
+- not focus it
+- put it on your second screen
+
+But you must keep it in the foreground.
+
+⛏️ Happy digging! ⛏️
