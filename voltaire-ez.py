@@ -205,23 +205,24 @@ def main():
                         response = input("Do you want to continue? (y/n) ")
                         if response.lower() == 'y':
                             WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".trainingEndViewGoHome"))).click()
-                            try:
-                                # If there's an exercise available, click it
-                                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
-                            except TimeoutException:
+                            for category in categories:
                                 try:
-                                    # If there's no exercise available, tries to go on Orthotypographie
-                                    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_2'))).click()
-                                    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                                    # Try to enter the category
+                                    WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, category))).click()
+
+                                    # Try to start an exercise
+                                    WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+
+                                    # If an exercise was started, wait for it to load and then break the loop
+                                    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".top-side-bar-training")))
+                                    break
                                 except TimeoutException:
-                                    try:
-                                        # If there's no exercise available, tries to go on Excellence
-                                        WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_3'))).click()
-                                        WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
-                                    except TimeoutException:
-                                        # If there's no exercise available, exits the program
-                                        print("❌ No more exercises available. Exiting the program...")
-                                        break
+                                    # If there's no exercise available in this category, continue with the next category
+                                    continue
+                            else:
+                                # If there's no exercise available in any category, exit the program
+                                print("❌ No more exercises available. Exiting the program...")
+                                break
                         # Exiting the while loop
                         elif response.lower() == 'n':
                             break
@@ -232,23 +233,24 @@ def main():
                     else:
                         print("🚀 Going to the next exercise...")
                         WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".trainingEndViewGoHome"))).click()
-                        try:
-                            # If there's an exercise available, click it
-                            WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
-                        except TimeoutException:
+                        for category in categories:
                             try:
-                                # If there's no exercise available, tries to go on Orthotypographie
-                                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_2'))).click()
-                                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                                # Try to enter the category
+                                WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, category))).click()
+
+                                # Try to start an exercise
+                                WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+
+                                # If an exercise was started, wait for it to load and then break the loop
+                                WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".top-side-bar-training")))
+                                break
                             except TimeoutException:
-                                try:
-                                    # If there's no exercise available, tries to go on Excellence
-                                    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_3'))).click()
-                                    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
-                                except TimeoutException:
-                                    # If there's no exercise available, exits the program
-                                    print("❌ No more exercises available. Exiting the program...")
-                                    break
+                                # If there's no exercise available in this category, continue with the next category
+                                continue
+                        else:
+                            # If there's no exercise available in any category, exit the program
+                            print("❌ No more exercises available. Exiting the program...")
+                            break
                 # If we're not at the end screen, do nothing and continue the loop
                 except TimeoutException:
                     pass
