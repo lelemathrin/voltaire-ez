@@ -160,10 +160,12 @@ def main():
                             no_mistake = 0
                             mistake_element = driver.find_element(By.CSS_SELECTOR, '.answerWord')
                             mistake_text = mistake_element.text
-                            # Remove unwanted characters from mistake_text
-                            mistake_text = mistake_text.replace(".", "").replace(",", "")
+                            # Removes unwanted dots from mistake_text
+                            mistake_text = mistake_text.replace(".", "")
+                            # Removes delimiters if they are at the beginning or end of the word
+                            # If they're not, splits the word by the delimiter and takes the first part
                             def split_text(mistake_text):
-                                for delimiter in [' ', '-', '‑', "'"]:
+                                for delimiter in [' ', '-', '‑', "'", ","]:
                                     if mistake_text and mistake_text[0] == delimiter:
                                         mistake_text = mistake_text[1:]
                                     elif mistake_text and mistake_text[-1] == delimiter:
@@ -174,6 +176,7 @@ def main():
                                             mistake_text = parts[0]
                                 return mistake_text
 
+                            # Runs two times to handle long compound words
                             mistake_text = split_text(mistake_text)
                             mistake_text = split_text(mistake_text)
                         # Inserts the sentence and the correctness of the answer into the 'Sentences' table

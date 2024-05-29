@@ -1,3 +1,4 @@
 .env
 sentences.db
 .venv
+test.py
