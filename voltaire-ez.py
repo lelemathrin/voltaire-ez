@@ -48,8 +48,25 @@ def main():
     
     print("")
     print("Entering the training...")
-    # Enters the training section
-    WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+    try:
+        # If there's an exercise available, click it
+        WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+    except TimeoutException:
+        try:
+            # If there's no exercise available, tries to go on Orthotypographie
+            WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_2'))).click()
+            WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+        except TimeoutException:
+            try:
+                # If there's no exercise available, tries to go on Excellence
+                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_3'))).click()
+                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+            except TimeoutException:
+                # If there's no exercise available, exits the program
+                print("❌ No more exercises available. Exiting the program...")
+                driver.quit()
+
+    # Waits for the exercise to load
     WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".top-side-bar-training")))
     
     # Connect to the database
@@ -174,7 +191,23 @@ def main():
                     response = input("Do you want to continue? (y/n) ")
                     if response.lower() == 'y':
                         WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".trainingEndViewGoHome"))).click()
-                        WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                        try:
+                            # If there's an exercise available, click it
+                            WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                        except TimeoutException:
+                            try:
+                                # If there's no exercise available, tries to go on Orthotypographie
+                                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_2'))).click()
+                                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                            except TimeoutException:
+                                try:
+                                    # If there's no exercise available, tries to go on Excellence
+                                    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_3'))).click()
+                                    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                                except TimeoutException:
+                                    # If there's no exercise available, exits the program
+                                    print("❌ No more exercises available. Exiting the program...")
+                                    break
                     # Exiting the while loop
                     elif response.lower() == 'n':
                         break
