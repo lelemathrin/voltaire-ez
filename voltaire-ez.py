@@ -48,27 +48,38 @@ def main():
     
     print("")
     print("Entering the training...")
-    try:
-        # If there's an exercise available, click it
-        WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
-    except TimeoutException:
+    # CSS selectors for the three categories
+    categories = ['#productTab_1', '#productTab_2', '#productTab_3']
+    for category in categories:
         try:
-            # If there's no exercise available, tries to go on Orthotypographie
-            WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_2'))).click()
-            WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
-        except TimeoutException:
-            try:
-                # If there's no exercise available, tries to go on Excellence
-                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_3'))).click()
-                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
-            except TimeoutException:
-                # If there's no exercise available, exits the program
-                print("❌ No more exercises available. Exiting the program...")
-                driver.quit()
+            # Try to enter the category
+            WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, category))).click()
 
-    # Waits for the exercise to load
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".top-side-bar-training")))
-    
+            # Try to start an exercise
+            WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+
+            # If an exercise was started, wait for it to load and then break the loop
+            WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".top-side-bar-training")))
+            break
+        except TimeoutException:
+            # If there's no exercise available in this category, continue with the next category
+            continue
+    else:
+        # If there's no exercise available in any category, exit the program
+        print("❌ No more exercises available. Exiting the program...")
+        driver.quit()
+        exit()
+
+    print("")
+    response_auto = input("❓ Do you want to go automatically to the next exercises? (y/n) ")
+    if response_auto.lower() == 'y':
+        pass
+    elif response_auto.lower() == 'n':
+        pass
+    else:
+        print("")
+        print("❌ Invalid input. Please enter 'y' or 'n'.")
+                        
     # Connect to the database
     with sqlite3.connect('sentences.db') as conn:
         # Create a cursor object
@@ -160,24 +171,22 @@ def main():
                             no_mistake = 0
                             mistake_element = driver.find_element(By.CSS_SELECTOR, '.answerWord')
                             mistake_text = mistake_element.text
-                            # Removes unwanted dots from mistake_text
-                            mistake_text = mistake_text.replace(".", "")
                             # Removes delimiters if they are at the beginning or end of the word
                             # If they're not, splits the word by the delimiter and takes the first part
-                            def split_text(mistake_text):
-                                for delimiter in [' ', '-', '‑', "'", ","]:
-                                    if mistake_text and mistake_text[0] == delimiter:
-                                        mistake_text = mistake_text[1:]
-                                    elif mistake_text and mistake_text[-1] == delimiter:
-                                        mistake_text = mistake_text[:-1]
-                                    else:
-                                        parts = mistake_text.split(delimiter)
-                                        if len(parts) > 1:
-                                            mistake_text = parts[0]
+                            def split_text(mistake_text, iterations=5):
+                                for _ in range(iterations):
+                                    for delimiter in [' ', '-', '‑', "'", ",", ".", ":", ";", "!", "?", "(", ")", "[", "]", "{", "}", "<", ">", "«", "»", "“", "”", "‘", "’", "„", "‟", "‹", "›", "‛", "‚", "‵", "‶", "‷", "‸"]:
+                                        if mistake_text and mistake_text[0] == delimiter:
+                                            mistake_text = mistake_text[1:]
+                                        elif mistake_text and mistake_text[-1] == delimiter:
+                                            mistake_text = mistake_text[:-1]
+                                        else:
+                                            parts = mistake_text.split(delimiter)
+                                            if len(parts) > 1:
+                                                mistake_text = parts[0]
                                 return mistake_text
 
-                            # Runs two times to handle long compound words
-                            mistake_text = split_text(mistake_text)
+                            # Runs multiple times to handle long compound words
                             mistake_text = split_text(mistake_text)
                         # Inserts the sentence and the correctness of the answer into the 'Sentences' table
                         c.execute("INSERT INTO Sentences VALUES (?, ?, ?)", (sentence, no_mistake, mistake_text))
@@ -185,14 +194,43 @@ def main():
                     # Goes to the next question
                     WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".nextButton"))).click()
             except TimeoutException:
-                    # Checks whether we're at the end screen or not
+                # Checks whether we're at the end screen or not
                 try:
                     # Check if the element .trainingEndViewDiv is present
                     WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.trainingEndViewDiv')))
                     print("")
                     print("🎉 Level completed!")
-                    response = input("Do you want to continue? (y/n) ")
-                    if response.lower() == 'y':
+                    # If the user chose to go manually to the next exercises
+                    if response_auto.lower() == 'n':
+                        response = input("Do you want to continue? (y/n) ")
+                        if response.lower() == 'y':
+                            WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".trainingEndViewGoHome"))).click()
+                            try:
+                                # If there's an exercise available, click it
+                                WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                            except TimeoutException:
+                                try:
+                                    # If there's no exercise available, tries to go on Orthotypographie
+                                    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_2'))).click()
+                                    WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                                except TimeoutException:
+                                    try:
+                                        # If there's no exercise available, tries to go on Excellence
+                                        WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '#productTab_3'))).click()
+                                        WebDriverWait(driver, 3).until(EC.element_to_be_clickable((By.CSS_SELECTOR, '.singleRunnable'))).click()
+                                    except TimeoutException:
+                                        # If there's no exercise available, exits the program
+                                        print("❌ No more exercises available. Exiting the program...")
+                                        break
+                        # Exiting the while loop
+                        elif response.lower() == 'n':
+                            break
+                        else:
+                            print("")
+                            print("❌ Invalid input. Please enter 'y' or 'n'.")
+                    # If the user chose to go automatically to the next exercises
+                    else:
+                        print("🚀 Going to the next exercise...")
                         WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".trainingEndViewGoHome"))).click()
                         try:
                             # If there's an exercise available, click it
@@ -211,21 +249,15 @@ def main():
                                     # If there's no exercise available, exits the program
                                     print("❌ No more exercises available. Exiting the program...")
                                     break
-                    # Exiting the while loop
-                    elif response.lower() == 'n':
-                        break
-                    else:
-                        print("")
-                        print("❌ Invalid input. Please enter 'y' or 'n'.")
+                # If we're not at the end screen, do nothing and continue the loop
                 except TimeoutException:
-                    # If the element is not present, do nothing and continue the loop
                     pass
-    
             
     # If we get out of the while loop, end the program
     print("")
     print("❤️ Thanks for using Voltaire Ez!")
     driver.quit()
+    exit()
 
 if __name__ == "__main__":
     main()

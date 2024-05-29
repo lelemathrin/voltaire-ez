@@ -1,4 +1,5 @@
 .env
 sentences.db
+sentences copy.db
 .venv
 test.py

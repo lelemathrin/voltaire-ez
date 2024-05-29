@@ -36,9 +36,9 @@ Automatise le passage des niveaux de la partie "Orthographe" de Projet-Voltaire.
 
 2. After running the script, it will start entering your credentials and **you will be asked to resolve a captcha and click the sign in button.**
 
-3. Once you've done that, the script will take over and start gathering the correct answers for your current level.
-
-4. When it finishes the current level, you will be asked to manually choose whether you want to continue or not.
+3. **You will then be asked to choose whether you want to go automatically to the next exercices.**
+   
+4. Once you've done that, the script will take over and start gathering the correct answers for your current level.
 
 ### Warning
 ❗ **Please keep the Chrome window in the foreground of your screen** ❗ to avoid errors. 
