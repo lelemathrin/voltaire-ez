@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import undetected_chromedriver as uc
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,9 +11,14 @@ import random
 from dotenv import load_dotenv
 
 load_dotenv()
-
 email = os.getenv('EMAIL')
 password = os.getenv('PASSWORD')
+
+def split_text(mistake_text):
+    # Find the first alphanumeric word or character
+    match = re.search(r'\b\w+\b', mistake_text)
+    # If a match is found, return it. Otherwise, return an empty string
+    return match.group() if match else ''
 
 def send_keys_human_speed(element, keys):
     for key in keys:
@@ -171,22 +177,6 @@ def main():
                             no_mistake = 0
                             mistake_element = driver.find_element(By.CSS_SELECTOR, '.answerWord')
                             mistake_text = mistake_element.text
-                            # Removes delimiters if they are at the beginning or end of the word
-                            # If they're not, splits the word by the delimiter and takes the first part
-                            def split_text(mistake_text, iterations=5):
-                                for _ in range(iterations):
-                                    for delimiter in [' ', '-', '‑', "'", ",", ".", ":", ";", "!", "?", "(", ")", "[", "]", "{", "}", "<", ">", "«", "»", "“", "”", "‘", "’", "„", "‟", "‹", "›", "‛", "‚", "‵", "‶", "‷", "‸"]:
-                                        if mistake_text and mistake_text[0] == delimiter:
-                                            mistake_text = mistake_text[1:]
-                                        elif mistake_text and mistake_text[-1] == delimiter:
-                                            mistake_text = mistake_text[:-1]
-                                        else:
-                                            parts = mistake_text.split(delimiter)
-                                            if len(parts) > 1:
-                                                mistake_text = parts[0]
-                                return mistake_text
-
-                            # Runs multiple times to handle long compound words
                             mistake_text = split_text(mistake_text)
                         # Inserts the sentence and the correctness of the answer into the 'Sentences' table
                         c.execute("INSERT INTO Sentences VALUES (?, ?, ?)", (sentence, no_mistake, mistake_text))
